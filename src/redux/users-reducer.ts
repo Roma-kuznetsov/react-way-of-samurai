@@ -1,4 +1,4 @@
-import { PhotosType } from './../types/types';
+import { UsersType } from './../types/types';
 import { usersAPI } from "../api/api";
 import { updateObjectInArray } from "../utils/object-helpers";
 
@@ -10,13 +10,7 @@ const SET_TOTAL_USERS_COUNT = 'SET_TOTAL_USERS_COUNT';
 const TOGGLE_IS_FETCHING = 'TOGGLE_IS_FETCHING';
 const TOGGLE_IS_FOLLOWING_PROGRESS = 'TOGGLE_IS_FOLLOWING_PROGRESS';
 
-type UsersType = {
-    id: number
-    name: string
-    status: string
-    followed: boolean
-    photos: PhotosType
-}
+
 
 
 let initialState = {
