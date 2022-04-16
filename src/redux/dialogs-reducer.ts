@@ -1,4 +1,4 @@
-import { type } from 'os';
+
 const SEND_MESSAGE = 'SEND_MESSAGE';
 
 type DialogsType = {
@@ -29,7 +29,9 @@ let initialState = {
     ] as Array<MessageType>
 };
 
-const dialogsReducer = (state = initialState, action: any) => {
+export type initialStateType = typeof initialState
+
+const dialogsReducer = (state = initialState, action: sendMessageCreatorType):initialStateType => {
     switch (action.type) {
         case SEND_MESSAGE:
             let body = action.newMessageBody;

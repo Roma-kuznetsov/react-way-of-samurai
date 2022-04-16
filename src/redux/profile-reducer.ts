@@ -1,5 +1,7 @@
 import { profileAPI, usersAPI } from "../api/api";
 import { stopSubmit } from "redux-form";
+import { AppStateType } from './redux-store';
+import { ThunkAction } from 'redux-thunk';
 
 const ADD_POST = 'ADD-POST';
 const SET_USER_PROFILE = 'SET_USER_PROFILE';
@@ -27,13 +29,12 @@ type PhotosType = {
     large: null | string
 }
 type ProfileType = {
-    userId: number
-    lookingForAJob: boolean
-    lookingForAJobDescription: string
-    fullName: string
-    contacts: ContactsType
-    photos: PhotosType
-
+    userId?: number
+    lookingForAJob?: boolean
+    lookingForAJobDescription?: string
+    fullName?: string
+    contacts?: ContactsType
+    photos?: PhotosType
 }
 
 let initialState = {
@@ -44,13 +45,13 @@ let initialState = {
         { id: 4, message: 'Dada', likesCount: 11 }
     ] as Array<PostType>,
     profile: null as ProfileType | null,
-    status: "",
-    newPostText: ''
+    status: " " as string | null,
+    newPostText: ' ' as string | null
 };
 
 export type initialStateType = typeof initialState
 
-const profileReducer = (state = initialState, action: any) => {
+const profileReducer = (state = initialState, action: ActionsType): initialStateType => {
 
     switch (action.type) {
         case ADD_POST: {
@@ -86,6 +87,8 @@ const profileReducer = (state = initialState, action: any) => {
     }
 }
 
+type ActionsType = addPostActionCreatorType | setUserProfileType | setStatusType | deletePostType | savePhotoSuccess 
+
 type addPostActionCreatorType = {
     type: typeof ADD_POST,
     newPostText: string
@@ -105,25 +108,27 @@ type deletePostType = {
     type: typeof DELETE_POST,
     postId: number
 }
-export const deletePost = (postId: number):deletePostType => ({ type: DELETE_POST, postId })
+export const deletePost = (postId: number): deletePostType => ({ type: DELETE_POST, postId })
 type savePhotoSuccess = {
     type: typeof SAVE_PHOTO_SUCCESS,
     photos: PhotosType
 }
-export const savePhotoSuccess = (photos: PhotosType):savePhotoSuccess => ({ type: SAVE_PHOTO_SUCCESS, photos })
+export const savePhotoSuccess = (photos: PhotosType): savePhotoSuccess => ({ type: SAVE_PHOTO_SUCCESS, photos })
+
+type ThunkType = ThunkAction<Promise<void>, AppStateType, unknown, ActionsType>
 
 
-export const getUserProfile = (userId:number) => async (dispatch:any) => {
+export const getUserProfile = (userId: number | null): ThunkType => async (dispatch) => {
     const response = await usersAPI.getProfile(userId);
     dispatch(setUserProfile(response.data));
 }
 
-export const getStatus = (userId:number) => async (dispatch:any) => {
+export const getStatus = (userId: number): ThunkType => async (dispatch) => {
     let response = await profileAPI.getStatus(userId);
     dispatch(setStatus(response.data));
 }
 
-export const updateStatus = (status:string) => async (dispatch:any) => {
+export const updateStatus = (status: string): ThunkType => async (dispatch) => {
     try {
         let response = await profileAPI.updateStatus(status);
 
@@ -131,24 +136,25 @@ export const updateStatus = (status:string) => async (dispatch:any) => {
             dispatch(setStatus(status));
         }
     } catch (error) {
-        //
+        console.log(error)
     }
 }
-export const savePhoto = (file:any) => async (dispatch:any) => {
+export const savePhoto = (file: any): ThunkType => async (dispatch) => {
     let response = await profileAPI.savePhoto(file);
 
     if (response.data.resultCode === 0) {
         dispatch(savePhotoSuccess(response.data.data.photos));
     }
 }
-export const saveProfile = (profile:ProfileType) => async (dispatch:any, getState:any) => {
+
+export const saveProfile = (profile: ProfileType) => async (dispatch:any, getState:any) => {
     const userId = getState().auth.userId;
     const response = await profileAPI.saveProfile(profile);
 
     if (response.data.resultCode === 0) {
         dispatch(getUserProfile(userId));
     } else {
-        dispatch(stopSubmit("edit-profile", { _error: response.data.messages[0] }));
+        dispatch(stopSubmit("edit-profile", { _error: response.data.messages[0] }))
         return Promise.reject(response.data.messages[0]);
     }
 }

@@ -1,3 +1,4 @@
+import { AppStateType } from './../redux/redux-store';
 
 export type ContactsType = {
     github: string | null
@@ -28,3 +29,5 @@ export type UsersType = {
     followed: boolean
     photos: PhotosType
 }
+
+export type GetStateType = () => AppStateType

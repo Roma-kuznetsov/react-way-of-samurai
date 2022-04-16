@@ -1,5 +1,7 @@
 import { authAPI, securityAPI } from "../api/api";
 import { stopSubmit } from "redux-form";
+import { AppStateType } from './redux-store';
+import { ThunkAction } from 'redux-thunk';
 
 const SET_USER_DATA = 'samurai-network/auth/SET_USER_DATA';
 const GET_CAPTCHA_URL_SUCCESS = 'samurai-network/auth/GET_CAPTCHA_URL_SUCCESS';
@@ -14,7 +16,7 @@ let initialState = {
 
 type InitialStateType1 = typeof initialState
 
-const authReducer = (state = initialState, action: any): InitialStateType1 => {
+const authReducer = (state = initialState, action: ActionsType): InitialStateType1 => {
     switch (action.type) {
         case SET_USER_DATA:
         case GET_CAPTCHA_URL_SUCCESS:
@@ -27,6 +29,10 @@ const authReducer = (state = initialState, action: any): InitialStateType1 => {
     }
 
 }
+
+type ActionsType = setAuthUserDataType | getCaptchaUrlSuccessType
+
+
 type setAuthUserDataPayloadType = {
     userId: number | null
     email: string | null
@@ -52,10 +58,10 @@ export const getCaptchaUrlSuccess = (captchaUrl: string): getCaptchaUrlSuccessTy
     type: GET_CAPTCHA_URL_SUCCESS, payload: { captchaUrl }
 });
 
+export type ThunkType = ThunkAction<Promise<void>, AppStateType, unknown, ActionsType>
 
 
-
-export const getAuthUserData = () => async (dispatch: any) => {
+export const getAuthUserData = ():ThunkType => async (dispatch) => {
     let response = await authAPI.me();
 
     if (response.data.resultCode === 0) {
@@ -79,7 +85,7 @@ export const login = (email: string, password: string, rememberMe: boolean, capt
     }
 }
 
-export const getCaptchaUrl = () => async (dispatch: any) => {
+export const getCaptchaUrl = ():ThunkType => async (dispatch) => {
     const response = await securityAPI.getCaptchaUrl();
     const captchaUrl = response.data.url;
     dispatch(getCaptchaUrlSuccess(captchaUrl));
@@ -87,7 +93,7 @@ export const getCaptchaUrl = () => async (dispatch: any) => {
 
 
 
-export const logout = () => async (dispatch: any) => {
+export const logout = ():ThunkType => async (dispatch) => {
     let response = await authAPI.logout();
 
     if (response.data.resultCode === 0) {
